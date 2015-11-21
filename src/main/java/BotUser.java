@@ -255,8 +255,9 @@ public class BotUser {
 
     public TradeOffer[] getIncomingTradeOffers() throws IOException
     {
-        Document document = Jsoup.parse(requestor.getAnswer(Requestor.query_type.GET,"http://steamcommunity.com/my/tradeoffers",null));
+        Document document = Jsoup.parse(requestor.getAnswer(Requestor.query_type.GET, "http://steamcommunity.com/my/tradeoffers", null));
         Elements tradeOfferElements = document.getElementsByClass("tradeoffer");
+        String itemEconomyData = new String(tradeOfferElements.first().getElementsByClass("trade_item").first().getElementsByAttribute(" data-economy-item=").toString());
 
         ArrayList<TradeOffer> offers = new ArrayList<TradeOffer>();
 
