@@ -27,10 +27,12 @@ public class Requestor {
 
     String getAnswer(query_type type, String baseURI, List<NameValuePair> params) throws IOException {
         HttpRequest request = createNewRequest(type, baseURI, params);
+
+
         HttpResponse response = null;
 
         try {
-            response = BotUser.currentUser.httpClient.execute((HttpUriRequest) request);
+            response = BotUser.currentUser.httpClient.execute((HttpUriRequest) request, BotUser.currentUser.httpClientContext);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -39,14 +41,8 @@ public class Requestor {
 
         java.util.Scanner serverAnswer = new java.util.Scanner(response.getEntity().getContent(), "UTF-8").useDelimiter("\\A");
 
-        String output = new String();
 
-        while(serverAnswer.hasNext())
-        {
-            output.concat(" " + serverAnswer.next());
-        }
-
-        return output;
+        return serverAnswer.hasNext() ? serverAnswer.next() : "";
     }
 
     HttpRequest createNewRequest(query_type type, String baseURI, List<NameValuePair> params)
