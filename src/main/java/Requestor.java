@@ -28,7 +28,6 @@ public class Requestor {
     String getAnswer(query_type type, String baseURI, List<NameValuePair> params) throws IOException {
         HttpRequest request = createNewRequest(type, baseURI, params);
 
-
         HttpResponse response = null;
 
         try {
@@ -37,7 +36,7 @@ public class Requestor {
             e.printStackTrace();
         }
 
-        assert response != null;
+        assert(response != null);
 
         java.util.Scanner serverAnswer = new java.util.Scanner(response.getEntity().getContent(), "UTF-8").useDelimiter("\\A");
 
