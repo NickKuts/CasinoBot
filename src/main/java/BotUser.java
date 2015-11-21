@@ -7,6 +7,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -49,6 +50,7 @@ public class BotUser {
     BotUser()
     {
         httpClient = new DefaultHttpClient();
+        httpClient.getParams().setParameter(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, true);
         gsonEntity = new Gson();
 
         httpClientContext = new HttpClientContext();
@@ -262,6 +264,7 @@ public class BotUser {
         {
 
             int id = Integer.parseInt(tradeOfferElement.id().substring(13)); // strip off tradeofferid_
+            System.out.println(id);
             boolean active = tradeOfferElement.getElementsByClass("tradeoffer_items_ctn").get(0).hasClass("active");
             TradeOffer tradeOffer = new TradeOffer(id, active);
             offers.add(tradeOffer);
