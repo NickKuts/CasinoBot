@@ -13,7 +13,6 @@ import java.util.List;
 
 public class Item {
     public String marketHashName;
-    public float marketPrice;
 
     public String appId;
     public String contextId;
@@ -31,7 +30,7 @@ public class Item {
         String median_price;
     }
 
-    Item(String itemEconomyData) throws IOException {
+    Item(String itemEconomyData) throws Exception {
         String[] parts = itemEconomyData.split("/");
 
         appId = parts[0];
@@ -72,19 +71,14 @@ public class Item {
 
         getMetrics(marketHashName, appId);
 
-        System.out.println(weaponMetrics.lowest_price);
+        if(weaponMetrics.success == false)
+            throw new Exception("Could not parse one or more items! with market_hash_name = " + marketHashName);
     }
 
     void getMetrics(String marketHashName, String appId) throws IOException {
         String baseURI = "http://steamcommunity.com/market/priceoverview/";
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
 
-        String formattedMarketHashName = marketHashName.replace(" ","%20");
-
-        params.add(new BasicNameValuePair("country", "US"));
-        params.add(new BasicNameValuePair("currency", "1"));
-        params.add(new BasicNameValuePair("appid", appId));
-        params.add(new BasicNameValuePair("market_hash_name", marketHashName));
+        String formattedMarketHashName = marketHashName.replace(" ","%20").replace("|", "%7C");
 
         String response = BotUser.currentUser.requestor.getAnswer(Requestor.query_type.GET, baseURI + "?" + "country=US&" + "currency=1&" +
                                                                      "appid=" + appId + "&" + "market_hash_name=" + formattedMarketHashName, null);

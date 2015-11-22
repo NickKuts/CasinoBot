@@ -5,7 +5,7 @@ import java.util.List;
 public class Inventory {
     List<Item> items;
 
-    Inventory(List<String> items) throws IOException {
+    Inventory(List<String> items) throws Exception {
         this.items = new ArrayList<Item>();
 
         for(String data : items)
