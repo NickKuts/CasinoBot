@@ -257,7 +257,6 @@ public class BotUser {
     {
         Document document = Jsoup.parse(requestor.getAnswer(Requestor.query_type.GET, "http://steamcommunity.com/my/tradeoffers", null));
         Elements tradeOfferElements = document.getElementsByClass("tradeoffer");
-        String itemEconomyData = new String(tradeOfferElements.first().getElementsByClass("trade_item").first().getElementsByAttribute(" data-economy-item=").toString());
 
         ArrayList<TradeOffer> offers = new ArrayList<TradeOffer>();
 
@@ -265,9 +264,17 @@ public class BotUser {
         {
 
             int id = Integer.parseInt(tradeOfferElement.id().substring(13)); // strip off tradeofferid_
-            System.out.println(id);
+
+            List<String> itemEconomyData = new ArrayList<String>();
+            Elements tradeItems = tradeOfferElement.getElementsByClass("trade_item");
+
+            for(Element element : tradeItems)
+            {
+                itemEconomyData.add(element.attr("data-economy-item"));   // appID/contextID/itemID/partnerID
+            }
+
             boolean active = tradeOfferElement.getElementsByClass("tradeoffer_items_ctn").get(0).hasClass("active");
-            TradeOffer tradeOffer = new TradeOffer(id, active);
+            TradeOffer tradeOffer = new TradeOffer(id, active, new ArrayList<String>(), itemEconomyData);
             offers.add(tradeOffer);
         }
 
