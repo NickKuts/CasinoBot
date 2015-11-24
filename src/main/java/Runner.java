@@ -10,6 +10,7 @@ public class Runner {
         try {
             currentUser.steamLogin("demo129", "truehack1r");
             TradeOffer[] tradeOffers = currentUser.getIncomingTradeOffers();
+            System.out.println("asfasfas");
         } catch (Exception e) {
             e.printStackTrace();
         }
