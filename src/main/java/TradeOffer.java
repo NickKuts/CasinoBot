@@ -37,7 +37,8 @@ public class TradeOffer {
 
         String answer = BotUser.currentUser.requestor.getAnswer(Requestor.query_type.POST, baseURI, params);
 
-        System.out.println(answer);
+        System.out.println(answer);;
+
 
         TradeID final_answer = BotUser.currentUser.gsonEntity.fromJson(answer, TradeID.class);
 
