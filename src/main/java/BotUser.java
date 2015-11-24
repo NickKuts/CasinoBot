@@ -1,10 +1,7 @@
 import com.google.gson.Gson;
 
 import com.sun.org.apache.xpath.internal.SourceTree;
-import org.apache.http.Header;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
+import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
@@ -43,7 +40,6 @@ public class BotUser {
     protected Gson gsonEntity;
 
     public static final Requestor requestor = new Requestor();
-    public static final BotUser curUser = new BotUser();
 
     public static final BotUser currentUser = new BotUser();
 
@@ -92,7 +88,7 @@ public class BotUser {
         String transfer_url;
     }
 
-    public void steamLogin(String username, String password) throws Exception, IOException {
+    public void steamLogin(String username, String password) throws Exception {
         Scanner scanner = new Scanner(System.in);
 
         String loginURI = "https://steamcommunity.com/login/getrsakey";
@@ -147,13 +143,35 @@ public class BotUser {
         loginParams.add(new BasicNameValuePair("rsatimestamp", rsaJSON.timestamp));
         loginParams.add(new BasicNameValuePair("remember_login", "false"));
 
-        HttpRequest webRequest = requestor.createNewRequest(Requestor.query_type.POST, "https://steamcommunity.com/login/dologin/", loginParams);
-
+        HttpRequest webRequest = requestor.createNewRequest(Requestor.query_type.GET, "https://steamcommunity.com/", null);
         HttpResponse webResponse = null;
-
         webResponse = BotUser.currentUser.httpClient.execute((HttpUriRequest) webRequest, BotUser.currentUser.httpClientContext);
 
         Header[] array = webResponse.getAllHeaders();
+
+        for(Header header : array)
+        {
+            if(header.getName().equals("Set-Cookie"))
+            {
+                String[] pairs = header.getValue().split(";");
+
+                String[] steamLogin = pairs[0].split("=");
+                String[] path = pairs[1].split("=");
+
+                addCookie(steamLogin[0], steamLogin[1], false);
+            }
+        }
+
+        HttpEntity enty = webResponse.getEntity();
+        if (enty != null)
+            enty.consumeContent();
+
+
+        webRequest = requestor.createNewRequest(Requestor.query_type.POST, "https://steamcommunity.com/login/dologin/", loginParams);
+        webResponse = null;
+        webResponse = BotUser.currentUser.httpClient.execute((HttpUriRequest) webRequest, BotUser.currentUser.httpClientContext);
+
+        array = webResponse.getAllHeaders();
 
         for(Header header : array)
         {
@@ -253,7 +271,7 @@ public class BotUser {
             throw new Exception("SteamWeb Error: " + loginResult.message);
     }
 
-    public TradeOffer[] getIncomingTradeOffers() throws IOException
+    public TradeOffer[] getIncomingTradeOffers() throws Exception
     {
         Document document = Jsoup.parse(requestor.getAnswer(Requestor.query_type.GET, "http://steamcommunity.com/my/tradeoffers", null));
         Elements tradeOfferElements = document.getElementsByClass("tradeoffer");

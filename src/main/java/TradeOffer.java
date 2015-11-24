@@ -8,6 +8,7 @@ import java.util.List;
 public class TradeOffer {
     public int id;
     public boolean isActive;
+    public String partnerId;
     Inventory botInventory;
     Inventory partnerInventory;
 
@@ -24,21 +25,29 @@ public class TradeOffer {
         botInventory = new Inventory(botItemEconomyData);
         partnerInventory = new Inventory(partnerItemEconomyData);
 
+        String[] parts = partnerItemEconomyData.get(0).split("/");
+        this.partnerId = parts[3];
+
         isAccepted = false;
     }
 
-    void accept() throws IOException {
+    public void accept() throws IOException {
         String baseURI = "https://steamcommunity.com/tradeoffer/" + id + "/accept";
 
         List<NameValuePair> params = new ArrayList<NameValuePair>();
         params.add(new BasicNameValuePair("tradeofferid", String.valueOf(id)));
         params.add(new BasicNameValuePair("serverid", "1"));
-        //params.add(new BasicNameValuePair("partner", ""));
+        params.add(new BasicNameValuePair("partner", partnerId));
+
+        String sessionId = BotUser.currentUser.httpClientContext.getCookieStore().getCookies().get(0).getValue();
+
+
+        params.add(new BasicNameValuePair("sessionid",sessionId));
+        
 
         String answer = BotUser.currentUser.requestor.getAnswer(Requestor.query_type.POST, baseURI, params);
 
         System.out.println(answer);;
-
 
         TradeID final_answer = BotUser.currentUser.gsonEntity.fromJson(answer, TradeID.class);
 
