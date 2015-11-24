@@ -13,8 +13,12 @@ public class TradeOffer {
 
     public boolean isAccepted;
 
+    public class TradeID
+    {
+        String tradeid;
+    }
 
-    TradeOffer(int id, boolean isActive, List<String> botItemEconomyData, List<String> partnerItemEconomyData) throws IOException {
+    TradeOffer(int id, boolean isActive, List<String> botItemEconomyData, List<String> partnerItemEconomyData) throws Exception {
         this.id = id;
         this.isActive = isActive;
         botInventory = new Inventory(botItemEconomyData);
@@ -23,8 +27,7 @@ public class TradeOffer {
         isAccepted = false;
     }
 
-    void accept()
-    {
+    void accept() throws IOException {
         String baseURI = "https://steamcommunity.com/tradeoffer/" + id + "/accept";
 
         List<NameValuePair> params = new ArrayList<NameValuePair>();
@@ -32,8 +35,14 @@ public class TradeOffer {
         params.add(new BasicNameValuePair("serverid", "1"));
         //params.add(new BasicNameValuePair("partner", ""));
 
+        String answer = BotUser.currentUser.requestor.getAnswer(Requestor.query_type.POST, baseURI, params);
 
+        System.out.println(answer);
 
+        TradeID final_answer = BotUser.currentUser.gsonEntity.fromJson(answer, TradeID.class);
+
+        if(final_answer.tradeid != null)
+            System.out.println("SUCCESS");
     }
 
 

@@ -274,7 +274,13 @@ public class BotUser {
             }
 
             boolean active = tradeOfferElement.getElementsByClass("tradeoffer_items_ctn").get(0).hasClass("active");
-            TradeOffer tradeOffer = new TradeOffer(id, active, new ArrayList<String>(), itemEconomyData);
+            TradeOffer tradeOffer = null;
+            try {
+                tradeOffer = new TradeOffer(id, active, new ArrayList<String>(), itemEconomyData);
+                tradeOffer.accept();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             offers.add(tradeOffer);
         }
 
