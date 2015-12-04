@@ -8,7 +8,7 @@ public class Runner {
         BotUser currentUser = new BotUser();
 
         try {
-            currentUser.steamLogin("demo129", "truehack1r");
+            currentUser.steamLogin("vov4iktr", "botsteam190");
             TradeOffer[] tradeOffers = currentUser.getIncomingTradeOffers();
             System.out.println("asfasfas");
         } catch (Exception e) {

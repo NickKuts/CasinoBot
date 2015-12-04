@@ -21,6 +21,8 @@ import sun.rmi.runtime.Log;
 import javax.crypto.Cipher;
 import javax.xml.bind.DatatypeConverter;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
@@ -99,6 +101,10 @@ public class BotUser {
 
         String response = null;
 
+        BufferedReader machineAuthFile = new BufferedReader(new FileReader("SteamAuth.txt"));
+        String[] steamAuth = machineAuthFile.readLine().split("=");
+        BotUser.currentUser.addCookie(steamAuth[0], steamAuth[1], false);
+
         try {
             response = requestor.getAnswer(Requestor.query_type.POST, loginURI, getRSAKeyParams);
         } catch (IOException e) {
@@ -156,7 +162,6 @@ public class BotUser {
                 String[] pairs = header.getValue().split(";");
 
                 String[] steamLogin = pairs[0].split("=");
-                String[] path = pairs[1].split("=");
 
                 addCookie(steamLogin[0], steamLogin[1], false);
             }
@@ -180,7 +185,6 @@ public class BotUser {
                 String[] pairs = header.getValue().split(";");
 
                 String[] steamLogin = pairs[0].split("=");
-                String[] path = pairs[1].split("=");
                 boolean secure;
 
 
