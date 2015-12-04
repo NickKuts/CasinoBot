@@ -41,20 +41,31 @@ public class TradeOffer {
 
         String sessionId = BotUser.currentUser.httpClientContext.getCookieStore().getCookies().get(0).getValue();
 
-
         params.add(new BasicNameValuePair("sessionid",sessionId));
-        
 
         String answer = BotUser.currentUser.requestor.getAnswer(Requestor.query_type.POST, baseURI, params);
-
         System.out.println(answer);;
-
         TradeID final_answer = BotUser.currentUser.gsonEntity.fromJson(answer, TradeID.class);
-
         if(final_answer.tradeid != null)
-            System.out.println("SUCCESS");
+            System.out.println("ACCEPT SUCCESS");
     }
 
+    public void decline() throws IOException {
+        String baseURI = "https://steamcommunity.com/tradeoffer/" + id + "/decline";
 
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("tradeofferid", String.valueOf(id)));
+        params.add(new BasicNameValuePair("serverid", "1"));
+        params.add(new BasicNameValuePair("partner", partnerId));
 
+        String sessionId = BotUser.currentUser.httpClientContext.getCookieStore().getCookies().get(0).getValue();
+
+        params.add(new BasicNameValuePair("sessionid",sessionId));
+
+        String answer = BotUser.currentUser.requestor.getAnswer(Requestor.query_type.POST, baseURI, params);
+        System.out.println(answer);
+        TradeID final_answer = BotUser.currentUser.gsonEntity.fromJson(answer, TradeID.class);
+        if(final_answer.tradeid == null)
+            System.out.println("DECLINE SUCCESS");
+    }
 }

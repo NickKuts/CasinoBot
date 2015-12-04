@@ -299,7 +299,7 @@ public class BotUser {
             TradeOffer tradeOffer = null;
             try {
                 tradeOffer = new TradeOffer(id, active, new ArrayList<String>(), itemEconomyData);
-                tradeOffer.accept();
+                tradeOffer.decline();
             } catch (Exception e) {
                 e.printStackTrace();
             }
