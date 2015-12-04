@@ -21,8 +21,7 @@ import sun.rmi.runtime.Log;
 import javax.crypto.Cipher;
 import javax.xml.bind.DatatypeConverter;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
@@ -91,6 +90,12 @@ public class BotUser {
     }
 
     public void steamLogin(String username, String password) throws Exception {
+        Scanner test = new Scanner(new File("steamAuth.txt"));
+        String loginInfo = test.nextLine();
+        String headerName = loginInfo.split("=")[0];
+        String cookieValue = loginInfo.split("=")[1];
+        BotUser.currentUser.addCookie(headerName, cookieValue, false);
+
         Scanner scanner = new Scanner(System.in);
 
         String loginURI = "https://steamcommunity.com/login/getrsakey";
@@ -100,10 +105,6 @@ public class BotUser {
         getRSAKeyParams.add(new BasicNameValuePair("username", username));
 
         String response = null;
-
-        BufferedReader machineAuthFile = new BufferedReader(new FileReader("SteamAuth.txt"));
-        String[] steamAuth = machineAuthFile.readLine().split("=");
-        BotUser.currentUser.addCookie(steamAuth[0], steamAuth[1], false);
 
         try {
             response = requestor.getAnswer(Requestor.query_type.POST, loginURI, getRSAKeyParams);
@@ -162,6 +163,7 @@ public class BotUser {
                 String[] pairs = header.getValue().split(";");
 
                 String[] steamLogin = pairs[0].split("=");
+                String[] path = pairs[1].split("=");
 
                 addCookie(steamLogin[0], steamLogin[1], false);
             }
@@ -185,6 +187,7 @@ public class BotUser {
                 String[] pairs = header.getValue().split(";");
 
                 String[] steamLogin = pairs[0].split("=");
+                String[] path = pairs[1].split("=");
                 boolean secure;
 
 
@@ -299,7 +302,7 @@ public class BotUser {
             TradeOffer tradeOffer = null;
             try {
                 tradeOffer = new TradeOffer(id, active, new ArrayList<String>(), itemEconomyData);
-                tradeOffer.decline();
+                tradeOffer.accept();
             } catch (Exception e) {
                 e.printStackTrace();
             }
