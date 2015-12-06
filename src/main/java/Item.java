@@ -30,6 +30,16 @@ public class Item {
         String median_price;
     }
 
+    Item(String appId, String marketHashName) throws IOException {
+        this.marketHashName = marketHashName;
+        this.appId = appId;
+
+        getMetrics(marketHashName, appId);
+
+        if(weaponMetrics.success == false)
+            System.out.println("Could not parse item with HashName = " + marketHashName);
+    }
+
     Item(String itemEconomyData) throws Exception {
         String[] parts = itemEconomyData.split("/");
 
@@ -53,6 +63,7 @@ public class Item {
         int counter = 0;
         char c;
         int j = 0;
+
         while(counter != 3)
         {
             c = document.toString().charAt(index + i);

@@ -1,6 +1,7 @@
 import com.google.gson.Gson;
 
 import com.sun.org.apache.xpath.internal.SourceTree;
+import javafx.util.Pair;
 import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -40,6 +41,8 @@ public class BotUser {
     protected HttpClientContext httpClientContext;
     protected Gson gsonEntity;
 
+    Inventory wholeInventory;
+
     public static final Requestor requestor = new Requestor();
 
     public static final BotUser currentUser = new BotUser();
@@ -57,6 +60,101 @@ public class BotUser {
         httpClientContext.setCookieStore(cookieStore);
     }
 
+    // Inits whole inventory with only CS:GO items
+
+    private void initInventory(String steamBeautyID) throws Exception {
+        // Change SteamID
+        String inventoryGetURI = "http://steamcommunity.com/id/" + steamBeautyID + "/inventory/json/730/2";
+
+        String response = null;
+
+        try {
+            response = requestor.getAnswer(Requestor.query_type.GET, inventoryGetURI, null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        GetInventory botInventory = gsonEntity.fromJson(response, GetInventory.class);
+
+        HashMap<Pair<String,String>, Integer> repeatCounter = new HashMap<Pair<String,String>, Integer>();
+
+        for(Map.Entry<String, HashMap<String, String>> item : botInventory.rgInventory.entrySet())
+        {
+
+            for(Map.Entry<String,String> innerItem : item.getValue().entrySet())
+            {
+                //class id + instance id
+
+                Pair<String, String> tmp;
+
+                String classid = null;
+                String instanceid = null;
+
+                if(innerItem.getKey().equals("classid"))
+                {
+                    classid = innerItem.getValue();
+                }
+
+                if(innerItem.getKey().equals("instanceid"))
+                {
+                    instanceid = innerItem.getValue();
+                }
+
+                tmp = new Pair(classid, instanceid);
+
+                if(!repeatCounter.containsKey(tmp))
+                {
+                    repeatCounter.put(tmp, 1);
+                }
+                else
+                {
+                    repeatCounter.put(tmp, new Integer(repeatCounter.get(tmp).intValue() + 1));
+                }
+            }
+        }
+
+        List<Object> items = new ArrayList<Object>();
+
+        for(Map.Entry<String, HashMap<String, String>> item : botInventory.rgDescriptions.entrySet())
+        {
+            String classAndInstance = item.getKey();
+            String class_id = classAndInstance.split("_")[0];
+            String instance_id = classAndInstance.split("_")[1];
+
+            Pair<String, String> pair = new Pair(class_id, instance_id);
+
+            int counter = repeatCounter.get(pair);
+
+            Pair<Object, Object> tmp = null;
+
+            for(Map.Entry<String,String> innerItem : item.getValue().entrySet())
+            {
+
+                String appid = null;
+                String marketHashName = null;
+
+                if(innerItem.getKey().equals("appid"))
+                {
+                    appid = innerItem.getValue();
+                }
+
+                if(innerItem.getKey().equals("market_hash_name"))
+                {
+                    marketHashName = innerItem.getValue();
+                }
+
+                tmp = new Pair(appid, marketHashName);
+            }
+
+            for(int i = 0; i < counter; ++i)
+            {
+                items.add(tmp);
+            }
+        }
+
+        wholeInventory = new Inventory(items, Inventory.typeOfOperation.outcomingTradeoffer);
+    }
+
     protected void addCookie(String login, String value, boolean secure)
     {
         BasicClientCookie cookie = new BasicClientCookie(login, value);
@@ -67,6 +165,24 @@ public class BotUser {
         cookie.setSecure(secure);
 
         httpClientContext.getCookieStore().addCookie(cookie);
+    }
+
+    private class parsedJSON
+    {
+        public String classid;
+        public String instanceid;
+        public String market_hash_name;
+        public String appid;
+    }
+
+    private class GetInventory
+    {
+        public boolean more;
+        public boolean more_start;
+        public int rgCurrency;
+        public HashMap<String, HashMap<String,String>> rgDescriptions;
+        public HashMap<String, HashMap<String,String>> rgInventory;
+        public boolean success;
     }
 
     private class GetRSAKey
@@ -265,6 +381,9 @@ public class BotUser {
 
         if (loginResult.success)
         {
+            // TODO!!!
+            initInventory("chaozL33T");
+
             loginParams = new ArrayList<NameValuePair>();
             for (Map.Entry<String, String> stringStringEntry : loginResult.transfer_parameters.entrySet()) {
                 Map.Entry pairs = (Map.Entry) stringStringEntry;
@@ -290,7 +409,7 @@ public class BotUser {
 
             int id = Integer.parseInt(tradeOfferElement.id().substring(13)); // strip off tradeofferid_
 
-            List<String> itemEconomyData = new ArrayList<String>();
+            List<Object> itemEconomyData = new ArrayList<Object>();
             Elements tradeItems = tradeOfferElement.getElementsByClass("trade_item");
 
             for(Element element : tradeItems)
@@ -300,12 +419,14 @@ public class BotUser {
 
             boolean active = tradeOfferElement.getElementsByClass("tradeoffer_items_ctn").get(0).hasClass("active");
             TradeOffer tradeOffer = null;
+
             try {
-                tradeOffer = new TradeOffer(id, active, new ArrayList<String>(), itemEconomyData);
+                tradeOffer = new TradeOffer(id, active, new ArrayList<Object>(), itemEconomyData);
                 tradeOffer.accept();
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
             offers.add(tradeOffer);
         }
 
