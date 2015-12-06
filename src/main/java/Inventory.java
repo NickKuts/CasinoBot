@@ -32,7 +32,11 @@ public class Inventory {
             {
                 Pair<String, String> curPair = (Pair<String,String>) data;
 
+<<<<<<< HEAD
                 this.items.add(new Item(curPair.getKey(), curPair.getValue()));
+=======
+                Item curItem = new Item(curPair.getKey(), curPair.getValue());
+>>>>>>> origin/master
             }
         }
     }

@@ -81,6 +81,7 @@ public class BotUser {
         for(Map.Entry<String, HashMap<String, String>> item : botInventory.rgInventory.entrySet())
         {
 
+<<<<<<< HEAD
             //class id + instance id
             Pair<String, String> tmp;
 
@@ -89,6 +90,17 @@ public class BotUser {
 
             for(Map.Entry<String,String> innerItem : item.getValue().entrySet())
             {
+=======
+            for(Map.Entry<String,String> innerItem : item.getValue().entrySet())
+            {
+                //class id + instance id
+
+                Pair<String, String> tmp;
+
+                String classid = null;
+                String instanceid = null;
+
+>>>>>>> origin/master
                 if(innerItem.getKey().equals("classid"))
                 {
                     classid = innerItem.getValue();
@@ -98,6 +110,7 @@ public class BotUser {
                 {
                     instanceid = innerItem.getValue();
                 }
+<<<<<<< HEAD
             }
             tmp = new Pair(classid, instanceid);
 
@@ -108,12 +121,29 @@ public class BotUser {
             else
             {
                 repeatCounter.put(tmp, new Integer(repeatCounter.get(tmp).intValue() + 1));
+=======
+
+                tmp = new Pair(classid, instanceid);
+
+                if(!repeatCounter.containsKey(tmp))
+                {
+                    repeatCounter.put(tmp, 1);
+                }
+                else
+                {
+                    repeatCounter.put(tmp, new Integer(repeatCounter.get(tmp).intValue() + 1));
+                }
+>>>>>>> origin/master
             }
         }
 
         List<Object> items = new ArrayList<Object>();
 
+<<<<<<< HEAD
         for(Map.Entry<String, HashMap<String, Object>> item : botInventory.rgDescriptions.entrySet())
+=======
+        for(Map.Entry<String, HashMap<String, String>> item : botInventory.rgDescriptions.entrySet())
+>>>>>>> origin/master
         {
             String classAndInstance = item.getKey();
             String class_id = classAndInstance.split("_")[0];
@@ -125,6 +155,7 @@ public class BotUser {
 
             Pair<Object, Object> tmp = null;
 
+<<<<<<< HEAD
             String appid = null;
             String marketHashName = null;
 
@@ -134,10 +165,22 @@ public class BotUser {
                 if(innerItem.getKey().equals("appid"))
                 {
                     appid = innerItem.getValue().toString();
+=======
+            for(Map.Entry<String,String> innerItem : item.getValue().entrySet())
+            {
+
+                String appid = null;
+                String marketHashName = null;
+
+                if(innerItem.getKey().equals("appid"))
+                {
+                    appid = innerItem.getValue();
+>>>>>>> origin/master
                 }
 
                 if(innerItem.getKey().equals("market_hash_name"))
                 {
+<<<<<<< HEAD
                     marketHashName = innerItem.getValue().toString();
                 }
                 if(innerItem.getKey().equals("tradable") && innerItem.getValue().equals(0.0)) {
@@ -159,6 +202,17 @@ public class BotUser {
                 for (int i = 0; i < counter; ++i) {
                     items.add(tmp);
                 }
+=======
+                    marketHashName = innerItem.getValue();
+                }
+
+                tmp = new Pair(appid, marketHashName);
+            }
+
+            for(int i = 0; i < counter; ++i)
+            {
+                items.add(tmp);
+>>>>>>> origin/master
             }
         }
 
@@ -189,9 +243,15 @@ public class BotUser {
     {
         public boolean more;
         public boolean more_start;
+<<<<<<< HEAD
         public int[] rgCurrency;
         public HashMap<String, HashMap<String, Object>> rgDescriptions;
         public HashMap<String, HashMap<String, String>> rgInventory;
+=======
+        public int rgCurrency;
+        public HashMap<String, HashMap<String,String>> rgDescriptions;
+        public HashMap<String, HashMap<String,String>> rgInventory;
+>>>>>>> origin/master
         public boolean success;
     }
 
@@ -391,7 +451,12 @@ public class BotUser {
 
         if (loginResult.success)
         {
+<<<<<<< HEAD
             initInventory("vov4iktr");
+=======
+            // TODO!!!
+            initInventory("chaozL33T");
+>>>>>>> origin/master
 
             loginParams = new ArrayList<NameValuePair>();
             for (Map.Entry<String, String> stringStringEntry : loginResult.transfer_parameters.entrySet()) {
