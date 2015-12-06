@@ -1,16 +1,39 @@
+import javafx.util.Pair;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+// TEST
+
 public class Inventory {
     List<Item> items;
 
-    Inventory(List<String> items) throws Exception {
-        this.items = new ArrayList<Item>();
+    static enum typeOfOperation {incomingTradeoffer, outcomingTradeoffer};
 
-        for(String data : items)
+    Inventory(List<Object>  items, typeOfOperation type) throws Exception {
+        if(type == typeOfOperation.incomingTradeoffer)
         {
-            this.items.add(new Item(data));
+            // each object is a string
+            this.items = new ArrayList<Item>();
+
+            for(Object data : items)
+            {
+                this.items.add(new Item((String)data));
+            }
+        }
+        else if((type == typeOfOperation.outcomingTradeoffer))
+        {
+            // each object is a pair of strings (appId, marketHashName)
+
+            this.items = new ArrayList<Item>();
+
+            for(Object data : items)
+            {
+                Pair<String, String> curPair = (Pair<String,String>) data;
+
+                this.items.add(new Item(curPair.getKey(), curPair.getValue()));
+            }
         }
     }
 }

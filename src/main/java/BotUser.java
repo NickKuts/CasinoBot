@@ -1,6 +1,7 @@
 import com.google.gson.Gson;
 
 import com.sun.org.apache.xpath.internal.SourceTree;
+import javafx.util.Pair;
 import org.apache.http.*;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -21,8 +22,7 @@ import sun.rmi.runtime.Log;
 import javax.crypto.Cipher;
 import javax.xml.bind.DatatypeConverter;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
@@ -41,6 +41,8 @@ public class BotUser {
     protected HttpClientContext httpClientContext;
     protected Gson gsonEntity;
 
+    Inventory wholeInventory;
+
     public static final Requestor requestor = new Requestor();
 
     public static final BotUser currentUser = new BotUser();
@@ -58,6 +60,111 @@ public class BotUser {
         httpClientContext.setCookieStore(cookieStore);
     }
 
+    // Inits whole inventory with only CS:GO items
+
+    private void initInventory(String steamBeautyID) throws Exception {
+        // Change SteamID
+        String inventoryGetURI = "http://steamcommunity.com/id/" + steamBeautyID + "/inventory/json/730/2";
+
+        String response = null;
+
+        try {
+            response = requestor.getAnswer(Requestor.query_type.GET, inventoryGetURI, null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        GetInventory botInventory = gsonEntity.fromJson(response, GetInventory.class);
+
+        HashMap<Pair<String,String>, Integer> repeatCounter = new HashMap<Pair<String,String>, Integer>();
+
+        for(Map.Entry<String, HashMap<String, String>> item : botInventory.rgInventory.entrySet())
+        {
+
+            //class id + instance id
+            Pair<String, String> tmp;
+
+            String classid = null;
+            String instanceid = null;
+
+            for(Map.Entry<String,String> innerItem : item.getValue().entrySet())
+            {
+                if(innerItem.getKey().equals("classid"))
+                {
+                    classid = innerItem.getValue();
+                }
+
+                if(innerItem.getKey().equals("instanceid"))
+                {
+                    instanceid = innerItem.getValue();
+                }
+            }
+            tmp = new Pair(classid, instanceid);
+
+            if(!repeatCounter.containsKey(tmp))
+            {
+                repeatCounter.put(tmp, 1);
+            }
+            else
+            {
+                repeatCounter.put(tmp, new Integer(repeatCounter.get(tmp).intValue() + 1));
+            }
+        }
+
+        List<Object> items = new ArrayList<Object>();
+
+        for(Map.Entry<String, HashMap<String, Object>> item : botInventory.rgDescriptions.entrySet())
+        {
+            String classAndInstance = item.getKey();
+            String class_id = classAndInstance.split("_")[0];
+            String instance_id = classAndInstance.split("_")[1];
+
+            Pair<String, String> pair = new Pair(class_id, instance_id);
+
+            int counter = repeatCounter.get(pair);
+
+            Pair<Object, Object> tmp = null;
+
+            String appid = null;
+            String marketHashName = null;
+
+            for(Map.Entry<String,Object> innerItem : item.getValue().entrySet())
+            {
+
+                if(innerItem.getKey().equals("appid"))
+                {
+                    appid = innerItem.getValue().toString();
+                }
+
+                if(innerItem.getKey().equals("market_hash_name"))
+                {
+                    marketHashName = innerItem.getValue().toString();
+                }
+                if(innerItem.getKey().equals("tradable") && innerItem.getValue().equals(0.0)) {
+                    appid = null;
+                    marketHashName = null;
+                    break;
+                }
+                if(innerItem.getKey().equals("marketable") && innerItem.getValue().equals(0.0))
+                {
+                    appid = null;
+                    marketHashName = null;
+                    break;
+                }
+            }
+
+            if(marketHashName != null && appid != null) {
+                tmp = new Pair(appid, marketHashName);
+
+                for (int i = 0; i < counter; ++i) {
+                    items.add(tmp);
+                }
+            }
+        }
+
+        wholeInventory = new Inventory(items, Inventory.typeOfOperation.outcomingTradeoffer);
+    }
+
     protected void addCookie(String login, String value, boolean secure)
     {
         BasicClientCookie cookie = new BasicClientCookie(login, value);
@@ -68,6 +175,24 @@ public class BotUser {
         cookie.setSecure(secure);
 
         httpClientContext.getCookieStore().addCookie(cookie);
+    }
+
+    private class parsedJSON
+    {
+        public String classid;
+        public String instanceid;
+        public String market_hash_name;
+        public String appid;
+    }
+
+    private class GetInventory
+    {
+        public boolean more;
+        public boolean more_start;
+        public int[] rgCurrency;
+        public HashMap<String, HashMap<String, Object>> rgDescriptions;
+        public HashMap<String, HashMap<String, String>> rgInventory;
+        public boolean success;
     }
 
     private class GetRSAKey
@@ -91,6 +216,12 @@ public class BotUser {
     }
 
     public void steamLogin(String username, String password) throws Exception {
+        Scanner test = new Scanner(new File("steamAuth.txt"));
+        String loginInfo = test.nextLine();
+        String headerName = loginInfo.split("=")[0];
+        String cookieValue = loginInfo.split("=")[1];
+        BotUser.currentUser.addCookie(headerName, cookieValue, false);
+
         Scanner scanner = new Scanner(System.in);
 
         String loginURI = "https://steamcommunity.com/login/getrsakey";
@@ -100,10 +231,6 @@ public class BotUser {
         getRSAKeyParams.add(new BasicNameValuePair("username", username));
 
         String response = null;
-
-        BufferedReader machineAuthFile = new BufferedReader(new FileReader("SteamAuth.txt"));
-        String[] steamAuth = machineAuthFile.readLine().split("=");
-        BotUser.currentUser.addCookie(steamAuth[0], steamAuth[1], false);
 
         try {
             response = requestor.getAnswer(Requestor.query_type.POST, loginURI, getRSAKeyParams);
@@ -162,6 +289,7 @@ public class BotUser {
                 String[] pairs = header.getValue().split(";");
 
                 String[] steamLogin = pairs[0].split("=");
+                String[] path = pairs[1].split("=");
 
                 addCookie(steamLogin[0], steamLogin[1], false);
             }
@@ -185,6 +313,7 @@ public class BotUser {
                 String[] pairs = header.getValue().split(";");
 
                 String[] steamLogin = pairs[0].split("=");
+                String[] path = pairs[1].split("=");
                 boolean secure;
 
 
@@ -262,6 +391,8 @@ public class BotUser {
 
         if (loginResult.success)
         {
+            initInventory("vov4iktr");
+
             loginParams = new ArrayList<NameValuePair>();
             for (Map.Entry<String, String> stringStringEntry : loginResult.transfer_parameters.entrySet()) {
                 Map.Entry pairs = (Map.Entry) stringStringEntry;
@@ -287,7 +418,7 @@ public class BotUser {
 
             int id = Integer.parseInt(tradeOfferElement.id().substring(13)); // strip off tradeofferid_
 
-            List<String> itemEconomyData = new ArrayList<String>();
+            List<Object> itemEconomyData = new ArrayList<Object>();
             Elements tradeItems = tradeOfferElement.getElementsByClass("trade_item");
 
             for(Element element : tradeItems)
@@ -297,12 +428,14 @@ public class BotUser {
 
             boolean active = tradeOfferElement.getElementsByClass("tradeoffer_items_ctn").get(0).hasClass("active");
             TradeOffer tradeOffer = null;
+
             try {
-                tradeOffer = new TradeOffer(id, active, new ArrayList<String>(), itemEconomyData);
-                tradeOffer.decline();
+                tradeOffer = new TradeOffer(id, active, new ArrayList<Object>(), itemEconomyData);
+                tradeOffer.accept();
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
             offers.add(tradeOffer);
         }
 
