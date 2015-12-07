@@ -32,7 +32,11 @@ public class Inventory {
             {
                 BotUser.ItemDesription item = (BotUser.ItemDesription) data;
 
+<<<<<<< HEAD
                 this.items.add(new Item(item.appId, item.marketHashName, item.assetId));
+=======
+                Item curItem = new Item(item.appId, item.marketHashName, item.assetId);
+>>>>>>> origin/master
             }
         }
     }
