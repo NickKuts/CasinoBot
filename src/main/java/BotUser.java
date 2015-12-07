@@ -139,6 +139,8 @@ public class BotUser {
 
             ItemDesription tmp = new ItemDesription();
 
+            // TEST
+
             for(Map.Entry<String,String> innerItem : item.getValue().entrySet())
             {
 
