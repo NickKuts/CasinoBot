@@ -47,8 +47,7 @@ public class BotUser {
 
     public static final BotUser currentUser = new BotUser();
 
-    BotUser()
-    {
+    BotUser() {
         httpClient = new DefaultHttpClient();
         httpClient.getParams().setParameter(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, true);
         gsonEntity = new Gson();
@@ -76,151 +75,93 @@ public class BotUser {
 
         GetInventory botInventory = gsonEntity.fromJson(response, GetInventory.class);
 
-        HashMap<Pair<String,String>, Integer> repeatCounter = new HashMap<Pair<String,String>, Integer>();
+        HashMap<Pair<String, String>, Pair<Integer, List<String>>> repeatCounter = new HashMap<Pair<String, String>, Pair<Integer, List<String>>>();
 
-        for(Map.Entry<String, HashMap<String, String>> item : botInventory.rgInventory.entrySet())
-        {
+        for (Map.Entry<String, HashMap<String, String>> item : botInventory.rgInventory.entrySet()) {
 
-<<<<<<< HEAD
             //class id + instance id
             Pair<String, String> tmp;
 
             String classid = null;
             String instanceid = null;
+            String assetid = null;
 
-            for(Map.Entry<String,String> innerItem : item.getValue().entrySet())
-            {
-=======
-            for(Map.Entry<String,String> innerItem : item.getValue().entrySet())
-            {
-                //class id + instance id
-
-                Pair<String, String> tmp;
-
-                String classid = null;
-                String instanceid = null;
-
->>>>>>> origin/master
-                if(innerItem.getKey().equals("classid"))
-                {
+            for (Map.Entry<String, String> innerItem : item.getValue().entrySet()) {
+                if (innerItem.getKey().equals("classid")) {
                     classid = innerItem.getValue();
                 }
 
-                if(innerItem.getKey().equals("instanceid"))
-                {
+                if (innerItem.getKey().equals("instanceid")) {
                     instanceid = innerItem.getValue();
                 }
-<<<<<<< HEAD
+                if (innerItem.getKey().equals(("id"))) {
+                    assetid = innerItem.getValue();
+                }
             }
+
             tmp = new Pair(classid, instanceid);
 
-            if(!repeatCounter.containsKey(tmp))
-            {
-                repeatCounter.put(tmp, 1);
-            }
-            else
-            {
-                repeatCounter.put(tmp, new Integer(repeatCounter.get(tmp).intValue() + 1));
-=======
+            if (!repeatCounter.containsKey(tmp)) {
+                //repeatCounter.put(tmp, 1);
+                ArrayList<String> toPaste = new ArrayList<String>();
+                toPaste.add(assetid);
 
-                tmp = new Pair(classid, instanceid);
-
-                if(!repeatCounter.containsKey(tmp))
-                {
-                    repeatCounter.put(tmp, 1);
-                }
-                else
-                {
-                    repeatCounter.put(tmp, new Integer(repeatCounter.get(tmp).intValue() + 1));
-                }
->>>>>>> origin/master
+                repeatCounter.put(tmp, new Pair(1, toPaste));
+            } else {
+                repeatCounter.get(tmp).getValue().add(assetid);
+                repeatCounter.put(tmp, new Pair(new Integer(repeatCounter.get(tmp).getKey().intValue() + 1), repeatCounter.get(tmp).getValue()));
             }
         }
 
         List<Object> items = new ArrayList<Object>();
 
-<<<<<<< HEAD
-        for(Map.Entry<String, HashMap<String, Object>> item : botInventory.rgDescriptions.entrySet())
-=======
-        for(Map.Entry<String, HashMap<String, String>> item : botInventory.rgDescriptions.entrySet())
->>>>>>> origin/master
-        {
+        for (Map.Entry<String, HashMap<String, Object>> item : botInventory.rgDescriptions.entrySet()) {
             String classAndInstance = item.getKey();
             String class_id = classAndInstance.split("_")[0];
             String instance_id = classAndInstance.split("_")[1];
 
             Pair<String, String> pair = new Pair(class_id, instance_id);
 
-            int counter = repeatCounter.get(pair);
+            int counter = repeatCounter.get(pair).getKey();
+            List<String> assetids = repeatCounter.get(pair).getValue();
 
-            Pair<Object, Object> tmp = null;
 
-<<<<<<< HEAD
             String appid = null;
             String marketHashName = null;
 
-            for(Map.Entry<String,Object> innerItem : item.getValue().entrySet())
-            {
+            for (Map.Entry<String, Object> innerItem : item.getValue().entrySet()) {
 
-                if(innerItem.getKey().equals("appid"))
-                {
+                if (innerItem.getKey().equals("appid")) {
                     appid = innerItem.getValue().toString();
-=======
-            for(Map.Entry<String,String> innerItem : item.getValue().entrySet())
-            {
-
-                String appid = null;
-                String marketHashName = null;
-
-                if(innerItem.getKey().equals("appid"))
-                {
-                    appid = innerItem.getValue();
->>>>>>> origin/master
                 }
 
-                if(innerItem.getKey().equals("market_hash_name"))
-                {
-<<<<<<< HEAD
+                if (innerItem.getKey().equals("market_hash_name")) {
                     marketHashName = innerItem.getValue().toString();
                 }
-                if(innerItem.getKey().equals("tradable") && innerItem.getValue().equals(0.0)) {
+                if (innerItem.getKey().equals("tradable") && innerItem.getValue().equals(0.0)) {
                     appid = null;
                     marketHashName = null;
                     break;
                 }
-                if(innerItem.getKey().equals("marketable") && innerItem.getValue().equals(0.0))
-                {
+                if (innerItem.getKey().equals("marketable") && innerItem.getValue().equals(0.0)) {
                     appid = null;
                     marketHashName = null;
                     break;
                 }
             }
 
-            if(marketHashName != null && appid != null) {
-                tmp = new Pair(appid, marketHashName);
-
+            if (marketHashName != null && appid != null) {
                 for (int i = 0; i < counter; ++i) {
-                    items.add(tmp);
+                    ItemDesription curItem = new ItemDesription(marketHashName, appid, assetids.get(i));
+                    items.add(curItem);
                 }
-=======
-                    marketHashName = innerItem.getValue();
-                }
-
-                tmp = new Pair(appid, marketHashName);
-            }
-
-            for(int i = 0; i < counter; ++i)
-            {
-                items.add(tmp);
->>>>>>> origin/master
             }
         }
 
         wholeInventory = new Inventory(items, Inventory.typeOfOperation.outcomingTradeoffer);
     }
 
-    protected void addCookie(String login, String value, boolean secure)
-    {
+    protected void addCookie(String login, String value, boolean secure) {
         BasicClientCookie cookie = new BasicClientCookie(login, value);
 
         cookie.setDomain("steamcommunity.com");
@@ -231,40 +172,45 @@ public class BotUser {
         httpClientContext.getCookieStore().addCookie(cookie);
     }
 
-    private class parsedJSON
-    {
+    public class ItemDesription {
+        String marketHashName;
+        String appId;
+        String assetId;
+
+        public ItemDesription(String marketHashName, String appId, String assetId) {
+            this.marketHashName = marketHashName;
+            this.appId = appId;
+            this.assetId = assetId;
+        }
+
+        ItemDesription() {
+        }
+    }
+
+    private class parsedJSON {
         public String classid;
         public String instanceid;
         public String market_hash_name;
         public String appid;
     }
 
-    private class GetInventory
-    {
+    private class GetInventory {
         public boolean more;
         public boolean more_start;
-<<<<<<< HEAD
         public int[] rgCurrency;
         public HashMap<String, HashMap<String, Object>> rgDescriptions;
         public HashMap<String, HashMap<String, String>> rgInventory;
-=======
-        public int rgCurrency;
-        public HashMap<String, HashMap<String,String>> rgDescriptions;
-        public HashMap<String, HashMap<String,String>> rgInventory;
->>>>>>> origin/master
         public boolean success;
     }
 
-    private class GetRSAKey
-    {
+    private class GetRSAKey {
         public boolean success;
         public String publickey_mod;
         public String publickey_exp;
         public String timestamp;
     }
 
-    private class SteamResult
-    {
+    private class SteamResult {
         public boolean success;
         public String message;
         public boolean captcha_needed;
@@ -300,7 +246,7 @@ public class BotUser {
 
         GetRSAKey rsaJSON = gsonEntity.fromJson(response, GetRSAKey.class);
 
-        if(rsaJSON.success == false)
+        if (rsaJSON.success == false)
             throw new Exception("Could not get RSA Key");
 
         BigInteger m = new BigInteger(rsaJSON.publickey_mod, 16);
@@ -342,10 +288,8 @@ public class BotUser {
 
         Header[] array = webResponse.getAllHeaders();
 
-        for(Header header : array)
-        {
-            if(header.getName().equals("Set-Cookie"))
-            {
+        for (Header header : array) {
+            if (header.getName().equals("Set-Cookie")) {
                 String[] pairs = header.getValue().split(";");
 
                 String[] steamLogin = pairs[0].split("=");
@@ -366,10 +310,8 @@ public class BotUser {
 
         array = webResponse.getAllHeaders();
 
-        for(Header header : array)
-        {
-            if(header.getName().equals("Set-Cookie"))
-            {
+        for (Header header : array) {
+            if (header.getName().equals("Set-Cookie")) {
                 String[] pairs = header.getValue().split(";");
 
                 String[] steamLogin = pairs[0].split("=");
@@ -377,12 +319,9 @@ public class BotUser {
                 boolean secure;
 
 
-                if(steamLogin[0].equals("steamLoginSecure"))
-                {
+                if (steamLogin[0].equals("steamLoginSecure")) {
                     secure = true;
-                }
-                else
-                {
+                } else {
                     secure = false;
                 }
 
@@ -395,8 +334,7 @@ public class BotUser {
         String steamGuardText = "";
         String steamGuardId = "";
 
-        while(loginResult.captcha_needed == true || loginResult.emailauth_needed == true)
-        {
+        while (loginResult.captcha_needed == true || loginResult.emailauth_needed == true) {
             System.out.println("SteamWeb: Logging in.......");
 
             boolean captcha = loginResult.captcha_needed;
@@ -410,12 +348,10 @@ public class BotUser {
             loginParams.add(new BasicNameValuePair("username", username));
 
             String capText = "";
-            if(captcha)
-            {
+            if (captcha) {
                 System.out.println("SteamWeb: Captcha needed.");
 
-                if(Desktop.isDesktopSupported())
-                {
+                if (Desktop.isDesktopSupported()) {
                     Desktop.getDesktop().browse(new URI("https://steamcommunity.com/public/captcha.php?gid=" + loginResult.captcha_gid));
                 } else {
                     System.out.println("https://steamcommunity.com/public/captcha.php?gid=" + loginResult.captcha_gid);
@@ -428,13 +364,11 @@ public class BotUser {
             loginParams.add(new BasicNameValuePair("captcha_text", captcha ? capText : ""));
 
 
-
-            if (steamGuard)
-            {
+            if (steamGuard) {
                 System.out.println("SteamWeb: SteamGuard is needed.");
                 System.out.println("SteamWeb: Type the code:");
                 steamGuardText = scanner.nextLine();
-                steamGuardId   = loginResult.emailsteamid;
+                steamGuardId = loginResult.emailsteamid;
             }
 
             loginParams.add(new BasicNameValuePair("emailauth", steamGuardText));
@@ -446,17 +380,11 @@ public class BotUser {
 
             webResponse = BotUser.currentUser.httpClient.execute((HttpUriRequest) webRequest, BotUser.currentUser.httpClientContext);
 
-           loginResult = gsonEntity.fromJson(new InputStreamReader(webResponse.getEntity().getContent()), SteamResult.class);
+            loginResult = gsonEntity.fromJson(new InputStreamReader(webResponse.getEntity().getContent()), SteamResult.class);
         }
 
-        if (loginResult.success)
-        {
-<<<<<<< HEAD
+        if (loginResult.success) {
             initInventory("vov4iktr");
-=======
-            // TODO!!!
-            initInventory("chaozL33T");
->>>>>>> origin/master
 
             loginParams = new ArrayList<NameValuePair>();
             for (Map.Entry<String, String> stringStringEntry : loginResult.transfer_parameters.entrySet()) {
@@ -466,28 +394,24 @@ public class BotUser {
             requestor.createNewRequest(Requestor.query_type.POST, loginResult.transfer_url, loginParams);
 
             System.out.println("Logged in successfully");
-        }
-        else
+        } else
             throw new Exception("SteamWeb Error: " + loginResult.message);
     }
 
-    public TradeOffer[] getIncomingTradeOffers() throws Exception
-    {
+    public TradeOffer[] getIncomingTradeOffers() throws Exception {
         Document document = Jsoup.parse(requestor.getAnswer(Requestor.query_type.GET, "http://steamcommunity.com/my/tradeoffers", null));
         Elements tradeOfferElements = document.getElementsByClass("tradeoffer");
 
         ArrayList<TradeOffer> offers = new ArrayList<TradeOffer>();
 
-        for(Element tradeOfferElement : tradeOfferElements)
-        {
+        for (Element tradeOfferElement : tradeOfferElements) {
 
             int id = Integer.parseInt(tradeOfferElement.id().substring(13)); // strip off tradeofferid_
 
             List<Object> itemEconomyData = new ArrayList<Object>();
             Elements tradeItems = tradeOfferElement.getElementsByClass("trade_item");
 
-            for(Element element : tradeItems)
-            {
+            for (Element element : tradeItems) {
                 itemEconomyData.add(element.attr("data-economy-item"));   // appID/contextID/itemID/partnerID
             }
 

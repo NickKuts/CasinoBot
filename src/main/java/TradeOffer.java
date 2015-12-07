@@ -24,11 +24,7 @@ public class TradeOffer {
         botInventory = new Inventory(botItemEconomyData, Inventory.typeOfOperation.incomingTradeoffer);
         partnerInventory = new Inventory(partnerItemEconomyData, Inventory.typeOfOperation.incomingTradeoffer);
 
-<<<<<<< HEAD
         String[] parts = ((String) partnerItemEconomyData.get(0)).split("/");
-=======
-        String[] parts = ((String)partnerItemEconomyData.get(0)).split("/");
->>>>>>> origin/master
 
         this.partnerId = parts[3];
 
@@ -46,7 +42,6 @@ public class TradeOffer {
         String sessionId = BotUser.currentUser.httpClientContext.getCookieStore().getCookies().get(0).getValue();
 
 
-<<<<<<< HEAD
         params.add(new BasicNameValuePair("sessionid", sessionId));
 
 
@@ -57,27 +52,19 @@ public class TradeOffer {
         TradeID final_answer = BotUser.currentUser.gsonEntity.fromJson(answer, TradeID.class);
 
         if (final_answer.tradeid != null)
-=======
-        params.add(new BasicNameValuePair("sessionid",sessionId));
-        
-
-        String answer = BotUser.currentUser.requestor.getAnswer(Requestor.query_type.POST, baseURI, params);
-
-        System.out.println(answer);;
-
-        TradeID final_answer = BotUser.currentUser.gsonEntity.fromJson(answer, TradeID.class);
-
-        if(final_answer.tradeid != null)
->>>>>>> origin/master
             System.out.println("SUCCESS");
     }
 
-    public void sendTradeOffer()
-    {
+    public void decline() throws IOException {
+        String baseURI = "https://steamcommunity.com/tradeoffer/" + id + "/decline";
 
+        List<NameValuePair> params = new ArrayList<NameValuePair>();
+        params.add(new BasicNameValuePair("tradeofferid", String.valueOf(id)));
+        params.add(new BasicNameValuePair("serverid", "1"));
+        params.add(new BasicNameValuePair("partner", partnerId));
 
+        String sessionId = BotUser.currentUser.httpClientContext.getCookieStore().getCookies().get(0).getValue();
 
-<<<<<<< HEAD
         params.add(new BasicNameValuePair("sessionid", sessionId));
 
         String answer = BotUser.currentUser.requestor.getAnswer(Requestor.query_type.POST, baseURI, params);
@@ -87,15 +74,11 @@ public class TradeOffer {
             System.out.println("DECLINE SUCCESS");
     }
 
-    /*public void sendTradeOffer() {
+    public void sendTradeOffer()
+    {
 
-
-    }*/
-
-=======
 
     }
 
->>>>>>> origin/master
 
 }
