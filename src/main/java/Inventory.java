@@ -30,9 +30,9 @@ public class Inventory {
 
             for(Object data : items)
             {
-                Pair<String, String> curPair = (Pair<String,String>) data;
+                BotUser.ItemDesription item = (BotUser.ItemDesription) data;
 
-                Item curItem = new Item(curPair.getKey(), curPair.getValue());
+                Item curItem = new Item(item.appId, item.marketHashName, item.assetId);
             }
         }
     }

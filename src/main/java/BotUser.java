@@ -76,7 +76,7 @@ public class BotUser {
 
         GetInventory botInventory = gsonEntity.fromJson(response, GetInventory.class);
 
-        HashMap<Pair<String,String>, Integer> repeatCounter = new HashMap<Pair<String,String>, Integer>();
+        HashMap<Pair<String,String>, Pair<Integer, List<String>>> repeatCounter = new HashMap<Pair<String, String>, Pair<Integer, List<String>>>();
 
         for(Map.Entry<String, HashMap<String, String>> item : botInventory.rgInventory.entrySet())
         {
@@ -89,6 +89,8 @@ public class BotUser {
 
                 String classid = null;
                 String instanceid = null;
+                String assetid = null;
+
 
                 if(innerItem.getKey().equals("classid"))
                 {
@@ -100,15 +102,21 @@ public class BotUser {
                     instanceid = innerItem.getValue();
                 }
 
+                if(innerItem.getKey().equals(("id")))
+                {
+                    assetid = innerItem.getValue();
+                }
+
                 tmp = new Pair(classid, instanceid);
 
                 if(!repeatCounter.containsKey(tmp))
                 {
-                    repeatCounter.put(tmp, 1);
+                    //repeatCounter.put(tmp, 1);
+                    repeatCounter.put(tmp, new Pair(1, new ArrayList<String>().add(assetid)));
                 }
                 else
                 {
-                    repeatCounter.put(tmp, new Integer(repeatCounter.get(tmp).intValue() + 1));
+                    repeatCounter.put(tmp, new Pair(new Integer(repeatCounter.get(tmp).getKey().intValue() + 1), repeatCounter.get(tmp).getValue().add(assetid)));
                 }
             }
         }
@@ -123,9 +131,13 @@ public class BotUser {
 
             Pair<String, String> pair = new Pair(class_id, instance_id);
 
-            int counter = repeatCounter.get(pair);
+            int counter = repeatCounter.get(pair).getKey();
 
-            Pair<Object, Object> tmp = null;
+            List<String> assetids = repeatCounter.get(pair).getValue();
+
+            //Pair<Object, Object> tmp = null;
+
+            ItemDesription tmp = new ItemDesription();
 
             for(Map.Entry<String,String> innerItem : item.getValue().entrySet())
             {
@@ -143,12 +155,16 @@ public class BotUser {
                     marketHashName = innerItem.getValue();
                 }
 
-                tmp = new Pair(appid, marketHashName);
+                tmp.appId = appid;
+                tmp.marketHashName = marketHashName;
             }
+
+            ItemDesription curItem = new ItemDesription(tmp);
 
             for(int i = 0; i < counter; ++i)
             {
-                items.add(tmp);
+                curItem.assetId = assetids.get(i);
+                items.add(curItem);
             }
         }
 
@@ -165,6 +181,22 @@ public class BotUser {
         cookie.setSecure(secure);
 
         httpClientContext.getCookieStore().addCookie(cookie);
+    }
+
+    public class ItemDesription
+    {
+        String marketHashName;
+        String appId;
+        String assetId;
+
+        ItemDesription(ItemDesription x)
+        {
+            marketHashName = x.marketHashName;
+            appId = x.appId;
+            assetId = x.assetId;
+        }
+
+        ItemDesription() {}
     }
 
     private class parsedJSON
@@ -381,6 +413,8 @@ public class BotUser {
 
         if (loginResult.success)
         {
+            System.out.println("Logged in successfully");
+
             // TODO!!!
             initInventory("chaozL33T");
 
@@ -390,8 +424,6 @@ public class BotUser {
                 loginParams.add(new BasicNameValuePair((String) pairs.getKey(), (String) pairs.getValue()));
             }
             requestor.createNewRequest(Requestor.query_type.POST, loginResult.transfer_url, loginParams);
-
-            System.out.println("Logged in successfully");
         }
         else
             throw new Exception("SteamWeb Error: " + loginResult.message);

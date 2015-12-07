@@ -18,6 +18,8 @@ public class Item {
     public String contextId;
     public String itemId;
 
+    public String assetid;
+
     public String partnerId;
     public JSONMetrics weaponMetrics;
 
@@ -30,9 +32,10 @@ public class Item {
         String median_price;
     }
 
-    Item(String appId, String marketHashName) throws IOException {
+    Item(String appId, String marketHashName, String assetid) throws IOException {
         this.marketHashName = marketHashName;
         this.appId = appId;
+        this.assetid = assetid;
 
         getMetrics(marketHashName, appId);
 
