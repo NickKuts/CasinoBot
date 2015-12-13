@@ -75,15 +75,10 @@ public class BotUser {
 
         GetInventory botInventory = gsonEntity.fromJson(response, GetInventory.class);
 
-<<<<<<< HEAD
         HashMap<Pair<String, String>, Pair<Integer, List<String>>> repeatCounter = new HashMap<Pair<String, String>, Pair<Integer, List<String>>>();
-=======
-        HashMap<Pair<String,String>, Pair<Integer, List<String>>> repeatCounter = new HashMap<Pair<String, String>, Pair<Integer, List<String>>>();
->>>>>>> origin/master
 
         for (Map.Entry<String, HashMap<String, String>> item : botInventory.rgInventory.entrySet()) {
 
-<<<<<<< HEAD
             //class id + instance id
             Pair<String, String> tmp;
 
@@ -93,74 +88,34 @@ public class BotUser {
 
             for (Map.Entry<String, String> innerItem : item.getValue().entrySet()) {
                 if (innerItem.getKey().equals("classid")) {
-=======
-            for(Map.Entry<String,String> innerItem : item.getValue().entrySet())
-            {
-                //class id + instance id
-
-                Pair<String, String> tmp;
-
-                String classid = null;
-                String instanceid = null;
-                String assetid = null;
-
-
-                if(innerItem.getKey().equals("classid"))
-                {
->>>>>>> origin/master
                     classid = innerItem.getValue();
                 }
 
                 if (innerItem.getKey().equals("instanceid")) {
                     instanceid = innerItem.getValue();
                 }
-<<<<<<< HEAD
                 if (innerItem.getKey().equals(("id"))) {
                     assetid = innerItem.getValue();
                 }
             }
 
             tmp = new Pair(classid, instanceid);
-=======
-
-                if(innerItem.getKey().equals(("id")))
-                {
-                    assetid = innerItem.getValue();
-                }
->>>>>>> origin/master
 
             if (!repeatCounter.containsKey(tmp)) {
                 //repeatCounter.put(tmp, 1);
                 ArrayList<String> toPaste = new ArrayList<String>();
                 toPaste.add(assetid);
 
-<<<<<<< HEAD
                 repeatCounter.put(tmp, new Pair(1, toPaste));
             } else {
                 repeatCounter.get(tmp).getValue().add(assetid);
                 repeatCounter.put(tmp, new Pair(new Integer(repeatCounter.get(tmp).getKey().intValue() + 1), repeatCounter.get(tmp).getValue()));
-=======
-                if(!repeatCounter.containsKey(tmp))
-                {
-                    //repeatCounter.put(tmp, 1);
-                    repeatCounter.put(tmp, new Pair(1, new ArrayList<String>().add(assetid)));
-                }
-                else
-                {
-                    repeatCounter.put(tmp, new Pair(new Integer(repeatCounter.get(tmp).getKey().intValue() + 1), repeatCounter.get(tmp).getValue().add(assetid)));
-                }
->>>>>>> origin/master
             }
         }
 
         List<Object> items = new ArrayList<Object>();
 
-<<<<<<< HEAD
         for (Map.Entry<String, HashMap<String, Object>> item : botInventory.rgDescriptions.entrySet()) {
-=======
-        for(Map.Entry<String, HashMap<String, String>> item : botInventory.rgDescriptions.entrySet())
-        {
->>>>>>> origin/master
             String classAndInstance = item.getKey();
             String class_id = classAndInstance.split("_")[0];
             String instance_id = classAndInstance.split("_")[1];
@@ -168,7 +123,6 @@ public class BotUser {
             Pair<String, String> pair = new Pair(class_id, instance_id);
 
             int counter = repeatCounter.get(pair).getKey();
-<<<<<<< HEAD
             List<String> assetids = repeatCounter.get(pair).getValue();
 
 
@@ -201,43 +155,6 @@ public class BotUser {
                     ItemDesription curItem = new ItemDesription(marketHashName, appid, assetids.get(i));
                     items.add(curItem);
                 }
-=======
-
-            List<String> assetids = repeatCounter.get(pair).getValue();
-
-            //Pair<Object, Object> tmp = null;
-
-            ItemDesription tmp = new ItemDesription();
-
-            // TEST
-
-            for(Map.Entry<String,String> innerItem : item.getValue().entrySet())
-            {
-
-                String appid = null;
-                String marketHashName = null;
-
-                if(innerItem.getKey().equals("appid"))
-                {
-                    appid = innerItem.getValue();
-                }
-
-                if(innerItem.getKey().equals("market_hash_name"))
-                {
-                    marketHashName = innerItem.getValue();
-                }
-
-                tmp.appId = appid;
-                tmp.marketHashName = marketHashName;
-            }
-
-            ItemDesription curItem = new ItemDesription(tmp);
-
-            for(int i = 0; i < counter; ++i)
-            {
-                curItem.assetId = assetids.get(i);
-                items.add(curItem);
->>>>>>> origin/master
             }
         }
 
@@ -255,17 +172,11 @@ public class BotUser {
         httpClientContext.getCookieStore().addCookie(cookie);
     }
 
-<<<<<<< HEAD
     public class ItemDesription {
-=======
-    public class ItemDesription
-    {
->>>>>>> origin/master
         String marketHashName;
         String appId;
         String assetId;
 
-<<<<<<< HEAD
         public ItemDesription(String marketHashName, String appId, String assetId) {
             this.marketHashName = marketHashName;
             this.appId = appId;
@@ -277,20 +188,6 @@ public class BotUser {
     }
 
     private class parsedJSON {
-=======
-        ItemDesription(ItemDesription x)
-        {
-            marketHashName = x.marketHashName;
-            appId = x.appId;
-            assetId = x.assetId;
-        }
-
-        ItemDesription() {}
-    }
-
-    private class parsedJSON
-    {
->>>>>>> origin/master
         public String classid;
         public String instanceid;
         public String market_hash_name;
@@ -300,15 +197,9 @@ public class BotUser {
     private class GetInventory {
         public boolean more;
         public boolean more_start;
-<<<<<<< HEAD
         public int[] rgCurrency;
         public HashMap<String, HashMap<String, Object>> rgDescriptions;
         public HashMap<String, HashMap<String, String>> rgInventory;
-=======
-        public int rgCurrency;
-        public HashMap<String, HashMap<String,String>> rgDescriptions;
-        public HashMap<String, HashMap<String,String>> rgInventory;
->>>>>>> origin/master
         public boolean success;
     }
 
@@ -492,32 +383,18 @@ public class BotUser {
             loginResult = gsonEntity.fromJson(new InputStreamReader(webResponse.getEntity().getContent()), SteamResult.class);
         }
 
-<<<<<<< HEAD
         if (loginResult.success) {
             initInventory("vov4iktr");
-=======
-        if (loginResult.success)
-        {
-            System.out.println("Logged in successfully");
 
-            // TODO!!!
-            initInventory("chaozL33T");
->>>>>>> origin/master
-
-            loginParams = new ArrayList<NameValuePair>();
+           /* loginParams = new ArrayList<NameValuePair>();
             for (Map.Entry<String, String> stringStringEntry : loginResult.transfer_parameters.entrySet()) {
                 Map.Entry pairs = (Map.Entry) stringStringEntry;
                 loginParams.add(new BasicNameValuePair((String) pairs.getKey(), (String) pairs.getValue()));
             }
-            requestor.createNewRequest(Requestor.query_type.POST, loginResult.transfer_url, loginParams);
-<<<<<<< HEAD
+            requestor.createNewRequest(Requestor.query_type.POST, loginResult.transfer_url, loginParams);*/
 
             System.out.println("Logged in successfully");
         } else
-=======
-        }
-        else
->>>>>>> origin/master
             throw new Exception("SteamWeb Error: " + loginResult.message);
     }
 
@@ -526,6 +403,7 @@ public class BotUser {
         Elements tradeOfferElements = document.getElementsByClass("tradeoffer");
 
         ArrayList<TradeOffer> offers = new ArrayList<TradeOffer>();
+        System.out.println("FOR GITHUB");
 
         for (Element tradeOfferElement : tradeOfferElements) {
 

@@ -11,6 +11,7 @@ public class Runner {
             currentUser.steamLogin("vov4iktr", "botsteam190");
             TradeOffer[] tradeOffers = currentUser.getIncomingTradeOffers();
             System.out.println("Program finished");
+            System.out.println("FOR GITHUB");
         } catch (Exception e) {
             e.printStackTrace();
         }
