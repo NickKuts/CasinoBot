@@ -22,9 +22,7 @@ import sun.rmi.runtime.Log;
 import javax.crypto.Cipher;
 import javax.xml.bind.DatatypeConverter;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.math.BigInteger;
 import java.net.CookieStore;
 import java.net.URI;
@@ -41,6 +39,8 @@ public class BotUser {
     protected HttpClientContext httpClientContext;
     protected Gson gsonEntity;
 
+    protected TwoFactorAuthData data2fa;
+
     Inventory wholeInventory;
 
     public static final Requestor requestor = new Requestor();
@@ -51,6 +51,8 @@ public class BotUser {
         httpClient = new DefaultHttpClient();
         httpClient.getParams().setParameter(ClientPNames.ALLOW_CIRCULAR_REDIRECTS, true);
         gsonEntity = new Gson();
+
+        data2fa = new TwoFactorAuthData();
 
         httpClientContext = new HttpClientContext();
 
@@ -221,12 +223,23 @@ public class BotUser {
         String transfer_url;
     }
 
+    private class TwoFactorAuthData
+    {
+        public String shared_secret;
+        public String identity_secret;
+        public String secret_1;
+
+        public String server_time;
+    }
+
     public void steamLogin(String username, String password) throws Exception {
         Scanner test = new Scanner(new File("steamAuth.txt"));
         String loginInfo = test.nextLine();
         String headerName = loginInfo.split("=")[0];
         String cookieValue = loginInfo.split("=")[1];
         BotUser.currentUser.addCookie(headerName, cookieValue, false);
+
+        initAuthData();
 
         Scanner scanner = new Scanner(System.in);
 
@@ -264,6 +277,11 @@ public class BotUser {
         String encryptedBase64Password = DatatypeConverter.printBase64Binary(encodedPassword);
 
         getRSAKeyParams = null;
+
+        // We need current time in specified format to generate 2FA SteamGuard code
+
+        long timeOffset = (new Date().getTime())/1000;
+
 
         List<NameValuePair> loginParams = new ArrayList<NameValuePair>();
 
@@ -396,6 +414,35 @@ public class BotUser {
             System.out.println("Logged in successfully");
         } else
             throw new Exception("SteamWeb Error: " + loginResult.message);
+    }
+
+    private void initAuthData() {
+        try (BufferedReader br = new BufferedReader(new FileReader("2faData.txt"))) {
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(":");
+
+                if(parts[0].equals("shared_secret"))
+                {
+                    data2fa.shared_secret = parts[1];
+                }
+                else if(parts[0].equals("secret_1"))
+                {
+                    data2fa.secret_1 = parts[1];
+                }
+                else if(parts[0].equals("identity_secret"))
+                {
+                    data2fa.identity_secret = parts[1];
+                }
+                else if(parts[0].equals("server_time"))
+                {
+                    data2fa.server_time = parts[1];
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public TradeOffer[] getIncomingTradeOffers() throws Exception {
