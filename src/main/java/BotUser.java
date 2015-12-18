@@ -233,7 +233,7 @@ public class BotUser {
 
     private class SteamServerInfo
     {
-        public String servertime;
+        public int servertime;
         public String servertimestring;
     }
 
@@ -244,11 +244,9 @@ public class BotUser {
         String response = requestor.getAnswer(Requestor.query_type.GET, serverInfoURI, null);
         SteamServerInfo info = gsonEntity.fromJson(response, SteamServerInfo.class);
 
-        Long a = new Long(response);
+        int servertime = info.servertime / 1000;
 
-        a /= 1000;
-
-        String toReturn = new String(String.valueOf(a));
+        String toReturn = new String(String.valueOf(servertime));
 
         return toReturn;
     }
