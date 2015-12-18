@@ -228,8 +228,29 @@ public class BotUser {
         public String shared_secret;
         public String identity_secret;
         public String secret_1;
-
         public String server_time;
+    }
+
+    private class SteamServerInfo
+    {
+        public String servertime;
+        public String servertimestring;
+    }
+
+    // Returns current server time in milleseconds from 1970
+
+    public String currentServerTime() throws IOException {
+        String serverInfoURI = "http://api.steampowered.com/SteamWebAPIUtil/GetServerInfo/v0001";
+        String response = requestor.getAnswer(Requestor.query_type.GET, serverInfoURI, null);
+        SteamServerInfo info = gsonEntity.fromJson(response, SteamServerInfo.class);
+
+        Long a = new Long(response);
+
+        a /= 1000;
+
+        String toReturn = new String(String.valueOf(a));
+
+        return toReturn;
     }
 
     public void steamLogin(String username, String password) throws Exception {
